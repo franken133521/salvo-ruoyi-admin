@@ -1,5 +1,6 @@
 mod router;
 mod controller;
+mod model;
 
 use once_cell::sync::Lazy;
 use redis::Client;
