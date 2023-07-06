@@ -10,3 +10,18 @@ pub struct CaptchaRes {
     pub img: String,
     pub uuid: String,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct LoginReq{
+  pub code:Option<String>,
+  pub password:Option<String>,
+  pub username:Option<String>,
+  pub uuid:Option<String>
+}
+
+
+// 登录返回
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct LoginRes{
+  pub token:String,
+}

@@ -1,8 +1,10 @@
 use captcha::{filters::Noise, Captcha};
 use redis::{Client, Commands};
 use salvo::oapi::endpoint;
+use salvo::oapi::extract::JsonBody;
 use uuid::Uuid;
 
+use crate::model::user_model::{LoginReq, LoginRes};
 use crate::model::ResObj;
 use crate::util::res::{res_json_err, Res};
 use crate::{model::user_model::CaptchaRes, util::res::res_json_ok, GLOBAL_REDIS};
@@ -36,4 +38,35 @@ pub async fn get_captcha() -> Res<CaptchaRes> {
     } else {
         Err(res_json_err("验证码生成失败".to_string()))
     }
+}
+
+macro_rules! validate_params {
+    ($struct:expr, $($field:ident),*) => {{
+        let input = $struct;
+
+        // 检查是否缺少必要的字段
+        $(
+            if !input.$field.is_some() {
+                panic!(concat!("缺少必要的参数 ", stringify!($field)));
+            }
+        )*
+        $(
+            if input.$field.as_ref().unwrap().is_empty() {
+                panic!(concat!("参数 ", stringify!($field), " 不能为空"));
+            }
+        )*
+    }};
+}
+
+/// 登录
+#[endpoint(
+    responses(
+        (status_code = 200,body=ResObj<LoginRes>,description ="登录")
+    )
+)]
+pub fn login(login_body: JsonBody<LoginReq>) -> Res<LoginRes> {
+    validate_params!(login_body, username);
+    Ok(res_json_ok(Some(LoginRes {
+        token: "123".to_string(),
+    })))
 }
