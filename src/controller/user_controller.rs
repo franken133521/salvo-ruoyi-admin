@@ -1,5 +1,5 @@
+use argon2::{self, Config};
 /// 用户相关接口
-
 use captcha::{filters::Noise, Captcha};
 use redis::{Client, Commands};
 use salvo::oapi::endpoint;
@@ -12,6 +12,7 @@ use crate::model::ResObj;
 use crate::util::res::{res_json_err, Res};
 use crate::{model::user_model::CaptchaRes, util::res::res_json_ok, GLOBAL_REDIS};
 
+static SALT: &[u8] =b"salvo-ruoyi-admin";
 // 生成验证码
 #[endpoint(
     responses(
@@ -51,12 +52,18 @@ pub async fn get_captcha() -> Res<CaptchaRes> {
 )]
 pub fn login(login_body: JsonBody<LoginReq>) -> Res<LoginRes> {
     match login_body.validate() {
-        Ok(_) => {},
+        Ok(_) => {}
         Err(e) => {
-            print!("validate error is {}",e);
+            print!("validate error is {}", e);
             return Err(res_json_err(e.to_string()));
         }
     }
+    // 加密密码后通过账号密码去查询记录
+    let password = &login_body.password;
+    let config = Config::default();
+    let hash = argon2::hash_encoded(password.as_bytes(), SALT, &config).unwrap();
+    // 打印密码
+    log::debug!("password is {}", hash);
     Ok(res_json_ok(Some(LoginRes {
         token: "123".to_string(),
     })))

@@ -4,11 +4,10 @@ use salvo::{
 };
 
 pub mod user_router;
-/// # Router
-/// 路由模块
-
+// # Router
+// 路由模块
 pub fn init() -> Router {
-    println!("router init");
+    log::info!("初始化路由");
 
     let router = Router::new()
         .hoop(Logger::new())
