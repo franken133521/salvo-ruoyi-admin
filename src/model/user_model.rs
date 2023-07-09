@@ -1,3 +1,4 @@
+use rbatis::rbdc::datetime::DateTime;
 use salvo::prelude::ToSchema;
 use serde::{Deserialize, Serialize};
 
@@ -30,4 +31,15 @@ pub struct LoginReq {
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct LoginRes {
     pub token: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SysUser {
+    pub user_id: u64,
+    pub user_name: Option<String>,
+    pub phone_number: Option<String>,
+    pub status: Option<String>,
+    pub dept_id: Option<i64>,
+    pub begin_time: Option<DateTime>,
+    pub end_time: Option<DateTime>,
 }

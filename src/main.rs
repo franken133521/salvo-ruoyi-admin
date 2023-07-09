@@ -10,8 +10,12 @@ use fast_log::{
 };
 use log::LevelFilter;
 use once_cell::sync::Lazy;
+use rbatis::RBatis;
+use rbdc_mysql::driver::MysqlDriver;
 use redis::Client;
 use salvo::{prelude::TcpListener, Listener, Server};
+
+pub static RB: Lazy<RBatis> = Lazy::new(RBatis::new);
 
 pub static GLOBAL_REDIS: Lazy<Client> = Lazy::new(|| {
     let client = redis::Client::open("redis://127.0.0.1/").expect("redis连接失败");
@@ -22,6 +26,7 @@ pub static GLOBAL_REDIS: Lazy<Client> = Lazy::new(|| {
 #[tokio::main]
 async fn main() {
     // tracing_subscriber::fmt().init();
+    // 初始化日志
     fast_log::init(
         Config::new()
             .level(LevelFilter::Debug)
@@ -35,7 +40,12 @@ async fn main() {
             ),
     )
     .unwrap();
+    // 初始化数据库连接
+    let mysql_uri = "mysql://root:123456@localhost/ry-vue";
+    RB.link(MysqlDriver {}, mysql_uri).await.unwrap();
+    // 初始化路由
     let router = router::init();
+    // 启动服务
     let acceptor = TcpListener::new("0.0.0.0:8090").bind().await;
     Server::new(acceptor).serve(router).await;
 }
